@@ -1,10 +1,16 @@
 package engine
 
 import (
+	"bufio"
 	"fmt"
 	"net"
+	"strings"
 
 	"github.com/google/uuid"
+)
+
+const (
+	DIVIDER = '\n'
 )
 
 type ClientOptions struct {
@@ -12,30 +18,26 @@ type ClientOptions struct {
 }
 
 type Client struct {
-	Id      uuid.UUID
-	Conn    net.Conn
-	Address string
+	Id   uuid.UUID
+	Conn net.Conn
 }
 
-func NewClient(opts *ClientOptions) *Client {
-	client := &Client{
-		Address: opts.Address,
-	}
-	return client
-}
-
-func (c *Client) Dial() error {
-	conn, err := net.Dial("tcp", c.Address)
+func NewClient(opts *ClientOptions) (*Client, error) {
+	conn, err := net.Dial("tcp", opts.Address)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	c.Conn = conn
-	return nil
+	client := &Client{
+		Conn: conn,
+	}
+	return client, nil
 }
 
-func (c *Client) Close() {
-	c.Conn.Close()
+func (c *Client) Close() error {
+	conn := c.Conn
+	err := conn.Close()
+	return err
 }
 
 func (c *Client) Send(a ...any) error {
@@ -53,4 +55,18 @@ func (c *Client) Send(a ...any) error {
 func (c *Client) Sendf(format string, a ...any) error {
 	s := fmt.Sprintf(format, a...)
 	return c.Send(s)
+}
+
+func (c *Client) ReadString() (string, error) {
+	conn := c.Conn
+	input, err := bufio.NewReader(conn).ReadString(DIVIDER)
+	if err != nil {
+		return "", err
+	}
+	str := strings.ReplaceAll(input, string(DIVIDER), "")
+	return str, nil
+}
+
+func (c *Client) ReadStruct() {
+
 }
