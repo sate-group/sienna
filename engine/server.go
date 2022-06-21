@@ -2,7 +2,7 @@ package engine
 
 import (
 	"bufio"
-	"log"
+	"io"
 	"net"
 	"strconv"
 	"strings"
@@ -16,12 +16,14 @@ const (
 
 type IListenerOnString func(client *Client, data string)
 type IListenerOnError func(err error)
+type IListenerOnStruct[T any] func(client *Client, dto T)
 
 type Server struct {
 	Clients        Clients
 	Port           uint16
 	eventsOnString []IListenerOnString
 	eventsOnError  []IListenerOnError
+	eventsOnStruct []IListenerOnStruct
 }
 
 func NewServer(options *ServerOptions) *Server {
@@ -48,7 +50,7 @@ func (s *Server) Listen() error {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			log.Println("Error in accepting waits for")
+			s.CauseError(err)
 		}
 		id := uuid.New()
 		client := &Client{
@@ -69,14 +71,26 @@ func (s *Server) HandleClient(client *Client) {
 	}()
 	for {
 		input, err := bufio.NewReader(conn).ReadString(DIVIDER)
-		if err != nil {
-			log.Print(err)
+		if err == io.EOF { // exit
+			return
+		} else if err != nil {
+			s.CauseError(err)
 			return
 		}
 		data := strings.ReplaceAll(input, string(DIVIDER), "")
 		for _, listener := range s.eventsOnString {
 			listener(client, data)
 		}
+
+		// for _, listener := range s.eventsOnStruct {
+
+		// }
+	}
+}
+
+func (s *Server) CauseError(err error) {
+	for _, listener := range s.eventsOnError {
+		listener(err)
 	}
 }
 
@@ -87,3 +101,8 @@ func (s *Server) OnString(listener IListenerOnString) {
 func (s *Server) OnError(listener IListenerOnError) {
 	s.eventsOnError = append(s.eventsOnError, listener)
 }
+
+type S struct{}
+
+// Identity is a simple identity method that works for any type.
+func (S) Identity[T any](v T) T { return v }

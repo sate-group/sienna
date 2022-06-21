@@ -12,11 +12,11 @@ func main() {
 	server := engine.NewServer(opts)
 
 	server.OnString(func(client *engine.Client, data string) {
-		logger.Infof("Client %s sent the message \"%s\"\n", client.Id.String()[1:8], data)
+		logger.Infof("Client %s sent the message \"%s\"", client.Id.String()[1:8], data)
 	})
 
 	server.OnError(func(err error) {
-
+		logger.Warnf(err.Error())
 	})
 
 	logger.Infof("Server listening on port %d", opts.Port)

@@ -42,7 +42,7 @@ func (c *Client) Send(a ...any) error {
 	s := fmt.Sprint(a...)
 	b := []byte(s)
 	b = append(b, DIVIDER)
-	
+
 	_, err := c.Conn.Write(b)
 	if err != nil {
 		return err
