@@ -1,25 +1,20 @@
 package main
 
 import (
-	"log"
-
 	"github.com/sate-infra/sienna/engine"
+	"github.com/sate-infra/sienna/logger"
 )
 
 func main() {
 	opts := &engine.ClientOptions{
 		Address: "localhost:9192",
 	}
-	client := engine.NewClient(opts)
-
-	err := client.Dial()
+	client, err := engine.NewClient(opts)
 	if err != nil {
 		panic(err)
 	}
 	defer client.Close()
+	logger.Infof("Client has successfully connected to the server")
 
-	err2 := client.Send("hello world")
-	if err2 != nil {
-		log.Println(err)
-	}
+	client.Send("hello!")
 }

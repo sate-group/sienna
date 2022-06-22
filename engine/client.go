@@ -2,6 +2,7 @@ package engine
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"net"
 	"strings"
@@ -57,6 +58,18 @@ func (c *Client) Sendf(format string, a ...any) error {
 	return c.Send(s)
 }
 
+func (c *Client) SendStruct(v any) error {
+	out, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	str := string(out)
+	if err := c.Sendf(str); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *Client) ReadString() (string, error) {
 	conn := c.Conn
 	input, err := bufio.NewReader(conn).ReadString(DIVIDER)
@@ -67,6 +80,13 @@ func (c *Client) ReadString() (string, error) {
 	return str, nil
 }
 
-func (c *Client) ReadStruct() {
-
+func (c *Client) ReadStruct(v any) error {
+	str, err := c.ReadString()
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal([]byte(str), &v); err != nil {
+		return err
+	}
+	return nil
 }
