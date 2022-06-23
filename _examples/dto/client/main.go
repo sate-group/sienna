@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/sate-infra/sienna/engine"
-	"github.com/sate-infra/sienna/logger"
+	"log"
+
+	engine "github.com/sate-infra/sienna"
 )
 
 type UserDto struct {
@@ -22,7 +23,7 @@ func main() {
 		panic(err)
 	}
 	defer client.Close()
-	logger.Infof("Client has successfully connected to the server")
+	log.Print("Client has successfully connected to the server")
 
 	user := &UserDto{
 		Gender:    "male",

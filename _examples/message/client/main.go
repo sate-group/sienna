@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/sate-infra/sienna/engine"
-	"github.com/sate-infra/sienna/logger"
+	"log"
+
+	engine "github.com/sate-infra/sienna"
 )
 
 func main() {
@@ -14,7 +15,7 @@ func main() {
 		panic(err)
 	}
 	defer client.Close()
-	logger.Infof("Client has successfully connected to the server")
+	log.Printf("Client has successfully connected to the server")
 
 	client.Send("hello!")
 }

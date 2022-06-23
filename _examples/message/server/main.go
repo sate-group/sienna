@@ -2,9 +2,9 @@ package main
 
 import (
 	"io"
+	"log"
 
-	"github.com/sate-infra/sienna/engine"
-	"github.com/sate-infra/sienna/logger"
+	engine "github.com/sate-infra/sienna"
 )
 
 func main() {
@@ -15,11 +15,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	logger.Infof("Server listening on port %d", opts.Port)
+	log.Printf("Server listening on port %d", opts.Port)
 	for {
 		client, err := server.Accept()
 		if err != nil {
-			logger.Warnf(err.Error())
+			log.Print(err.Error())
 			continue
 		}
 		go handleClient(client)
@@ -31,12 +31,12 @@ func handleClient(client *engine.Client) {
 	for {
 		str, err := client.ReadString()
 		if err == io.EOF {
-			logger.Warnf("No more input is available.")
+			log.Print("No more input is available.")
 			return
 		} else if err != nil {
-			logger.Warnf(err.Error())
+			log.Print(err.Error())
 			return
 		}
-		logger.Infof("Client sent the message \"%s\"", str)
+		log.Printf("Client sent the message \"%s\"", str)
 	}
 }
