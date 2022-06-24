@@ -1,13 +1,25 @@
 package sienna
 
+import "net"
+
 type TcpServer struct {
+	l       net.Listener
 	address string
 }
 
-func newTcpServer(address string) *TcpServer {
-	return &TcpServer{
-		address: address,
+func newTcpServer(address string) (*TcpServer, error) {
+	l, err := net.Listen("tcp", address)
+	if err != nil {
+		return nil, err
 	}
+	return &TcpServer{
+		l:       l,
+		address: address,
+	}, nil
+}
+
+func (s *TcpServer) Listener() net.Listener {
+	return s.l
 }
 
 func (s *TcpServer) Address() string {
@@ -19,8 +31,18 @@ func (s *TcpServer) Kind() string {
 }
 
 func (s *TcpServer) Accept() (Client, error) {
-	return nil, nil
+	l := s.l
+	conn, err := l.Accept()
+	if err != nil {
+		return nil, err
+	}
+	var client Client = &TcpClient{
+		conn: conn,
+	}
+	return client, nil
 }
 func (s *TcpServer) Close() error {
-	return nil
+	l := s.Listener()
+	err := l.Close()
+	return err
 }

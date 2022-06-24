@@ -1,10 +1,13 @@
 package sienna
 
+import "net"
+
 type UnknownServerKindError string
 
 func (e UnknownServerKindError) Error() string { return "Unknown server kind " + string(e) }
 
 type Server interface {
+	Listener() net.Listener
 	Address() string
 	Kind() string
 
@@ -13,11 +16,12 @@ type Server interface {
 }
 
 func NewServer(kind string, address string) (Server, error) {
-	var server Server
-
 	switch kind {
 	case "tcp":
-		server = newTcpServer(address)
+		server, err := newTcpServer(address)
+		if err != nil {
+			return nil, err
+		}
 		return server, nil
 	default:
 		return nil, UnknownServerKindError(kind)
