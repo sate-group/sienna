@@ -1,43 +1,25 @@
-package engine
+package sienna
 
-import (
-	"net"
-	"strconv"
-)
+type UnknownServerKindError string
 
-type Server struct {
-	Listener net.Listener
-	Port     uint16
+func (e UnknownServerKindError) Error() string { return "Unknown server kind " + string(e) }
+
+type Server interface {
+	Address() string
+	Kind() string
+
+	Accept() (Client, error)
+	Close() error
 }
 
-func NewServer(options *ServerOptions) (*Server, error) {
-	address := ":" + strconv.Itoa(int(options.Port))
-	l, err := net.Listen("tcp", address)
-	if err != nil {
-		return nil, err
-	}
-	server := &Server{
-		Listener: l,
-		Port:     options.getPort(),
-	}
+func NewServer(kind string, address string) (Server, error) {
+	var server Server
 
-	return server, nil
-}
-
-func (s *Server) Close() error {
-	l := s.Listener
-	err := l.Close()
-	return err
-}
-
-func (s *Server) Accept() (*Client, error) {
-	l := s.Listener
-	conn, err := l.Accept()
-	if err != nil {
-		return nil, err
+	switch kind {
+	case "tcp":
+		server = newTcpServer(address)
+		return server, nil
+	default:
+		return nil, UnknownServerKindError(kind)
 	}
-	client := &Client{
-		Conn: conn,
-	}
-	return client, nil
 }
