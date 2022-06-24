@@ -15,7 +15,7 @@ type Server interface {
 	Close() error
 }
 
-func NewServer(kind string, address string) (Server, error) {
+func NewServer(kind, address string) (Server, error) {
 	switch kind {
 	case "tcp":
 		server, err := newTcpServer(address)

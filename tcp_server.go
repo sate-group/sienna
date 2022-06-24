@@ -12,10 +12,11 @@ func newTcpServer(address string) (*TcpServer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &TcpServer{
+	server := &TcpServer{
 		l:       l,
 		address: address,
-	}, nil
+	}
+	return server, nil
 }
 
 func (s *TcpServer) Listener() net.Listener {
