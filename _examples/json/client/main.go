@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	engine "github.com/sate-infra/sienna"
+	"github.com/sate-infra/sienna"
 )
 
 type UserDto struct {
@@ -15,10 +15,8 @@ type UserDto struct {
 }
 
 func main() {
-	opts := &engine.ClientOptions{
-		Address: "localhost:9192",
-	}
-	client, err := engine.NewClient(opts)
+	address := ":9192"
+	client, err := sienna.NewClient("tcp", address)
 	if err != nil {
 		panic(err)
 	}
@@ -32,5 +30,5 @@ func main() {
 		Street:    "2551 Eastland Avenue",
 		Telephone: "601-420-5622",
 	}
-	client.SendStruct(user)
+	client.SendJson(user)
 }
