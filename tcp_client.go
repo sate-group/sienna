@@ -2,10 +2,15 @@ package sienna
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"net"
 	"strings"
 )
+
+type SendDataFailedError string
+
+func (e SendDataFailedError) Error() string { return "Data transter failed" + string(e) }
 
 type TcpClient struct {
 	conn    net.Conn
@@ -64,4 +69,29 @@ func (c *TcpClient) Read() (string, error) {
 	}
 	result := strings.ReplaceAll(str, string(DIVIDER), "")
 	return result, nil
+}
+
+func (c *TcpClient) SendJson(v any) error {
+	out, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	str := string(out)
+	if ok, err := c.Send(str); err != nil {
+		return err
+	} else if !ok {
+		return SendDataFailedError(str)
+	}
+	return nil
+}
+
+func (c *TcpClient) ReadJson(v any) error {
+	str, err := c.Read()
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal([]byte(str), &v); err != nil {
+		return err
+	}
+	return nil
 }

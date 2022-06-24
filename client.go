@@ -19,6 +19,8 @@ type Client interface {
 
 	Send(a ...any) (bool, error)
 	Read() (string, error)
+	SendJson(v any) error
+	ReadJson(v any) error
 }
 
 func NewClient(kind, address string) (Client, error) {
