@@ -14,6 +14,11 @@ type Client interface {
 	Conn() net.Conn
 	Address() string
 	Kind() string
+
+	Close() error
+
+	Send(a ...any) (bool, error)
+	Read() (string, error)
 }
 
 func NewClient(kind, address string) (Client, error) {
