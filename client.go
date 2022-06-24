@@ -1,13 +1,8 @@
 package sienna
 
-type Client interface {
-	Close() error
-	Send(a ...any) error
-	SendStruct(v any) error
-	ReadString() (string, error)
-	ReadStruct(v any) error
-}
+const (
+	DIVIDER = '\n'
+)
 
-type ClientOptions struct {
-	Address string
+type Client interface {
 }

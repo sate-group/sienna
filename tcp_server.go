@@ -1,44 +1,26 @@
 package sienna
 
-import (
-	"net"
-	"strconv"
-)
-
 type TcpServer struct {
-	Listener net.Listener
-	Options  *ServerOptions
+	address string
 }
 
-func NewTcpServer(opts *ServerOptions) (*Server, error) {
-	port := opts.getPort()
-	address := ":" + strconv.Itoa(int(port))
-	l, err := net.Listen("tcp", address)
-	if err != nil {
-		return nil, err
+func newTcpServer(address string) *TcpServer {
+	return &TcpServer{
+		address: address,
 	}
-	var server Server = &TcpServer{
-		Listener: l,
-		Options:  opts,
-	}
-
-	return &server, nil
 }
 
+func (s *TcpServer) Address() string {
+	return s.address
+}
+
+func (s *TcpServer) Kind() string {
+	return "tcp"
+}
+
+func (s *TcpServer) Accept() (Client, error) {
+	return nil, nil
+}
 func (s *TcpServer) Close() error {
-	l := s.Listener
-	err := l.Close()
-	return err
-}
-
-func (s *TcpServer) Accept() (*Client, error) {
-	l := s.Listener
-	conn, err := l.Accept()
-	if err != nil {
-		return nil, err
-	}
-	client := &Client{
-		Conn: conn,
-	}
-	return client, nil
+	return nil
 }
