@@ -2,28 +2,24 @@ package sienna
 
 import "net"
 
-type UnknownServerKindError string
-
-func (e UnknownServerKindError) Error() string { return "Unknown server kind " + string(e) }
-
 type Server interface {
 	Listener() net.Listener
 	Address() string
-	Kind() string
+	Network() string
 
 	Accept() (Client, error)
 	Close() error
 }
 
-func NewServer(kind, address string) (Server, error) {
-	switch kind {
-	case "tcp":
+func NewServer(network, address string) (Server, error) {
+	switch network {
+	case TCP_SERVER_NETWORK:
 		server, err := newTcpServer(address)
 		if err != nil {
 			return nil, err
 		}
 		return server, nil
 	default:
-		return nil, UnknownServerKindError(kind)
+		return nil, UnknownNetworkError(network)
 	}
 }

@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-type SendDataFailedError string
-
-func (e SendDataFailedError) Error() string { return "Data transter failed" + string(e) }
+const (
+	TCP_CLIENT_NETWORK = "tcp"
+)
 
 type TcpClient struct {
 	conn    net.Conn
@@ -29,15 +29,9 @@ func newTcpClient(address string) (*TcpClient, error) {
 	return client, nil
 }
 
-func (c *TcpClient) Conn() net.Conn {
-	return c.conn
-}
-func (c *TcpClient) Address() string {
-	return c.address
-}
-func (c *TcpClient) Network() string {
-	return "tcp"
-}
+func (c *TcpClient) Conn() net.Conn  { return c.conn }
+func (c *TcpClient) Address() string { return c.address }
+func (c *TcpClient) Network() string { return "tcp" }
 
 func (c *TcpClient) Close() error {
 	conn := c.Conn()

@@ -2,6 +2,10 @@ package sienna
 
 import "net"
 
+const (
+	TCP_SERVER_NETWORK = "tcp"
+)
+
 type TcpServer struct {
 	l       net.Listener
 	address string
@@ -19,17 +23,11 @@ func newTcpServer(address string) (*TcpServer, error) {
 	return server, nil
 }
 
-func (s *TcpServer) Listener() net.Listener {
-	return s.l
-}
+func (s *TcpServer) Listener() net.Listener { return s.l }
 
-func (s *TcpServer) Address() string {
-	return s.address
-}
+func (s *TcpServer) Address() string { return s.address }
 
-func (s *TcpServer) Kind() string {
-	return "tcp"
-}
+func (s *TcpServer) Network() string { return "tcp" }
 
 func (s *TcpServer) Accept() (Client, error) {
 	l := s.l

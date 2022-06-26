@@ -6,10 +6,6 @@ const (
 	DIVIDER = '\n'
 )
 
-type UnknownClientKindError string
-
-func (e UnknownClientKindError) Error() string { return "Unknown client kind " + string(e) }
-
 type Client interface {
 	Conn() net.Conn
 	Address() string
@@ -23,15 +19,15 @@ type Client interface {
 	ReadJson(v any) error
 }
 
-func NewClient(kind, address string) (Client, error) {
-	switch kind {
-	case "tcp":
+func NewClient(network, address string) (Client, error) {
+	switch network {
+	case TCP_CLIENT_NETWORK:
 		client, err := newTcpClient(address)
 		if err != nil {
 			return nil, err
 		}
 		return client, nil
 	default:
-		return nil, UnknownClientKindError(kind)
+		return nil, UnknownNetworkError(network)
 	}
 }
