@@ -13,7 +13,7 @@ func (e UnknownClientKindError) Error() string { return "Unknown client kind " +
 type Client interface {
 	Conn() net.Conn
 	Address() string
-	Kind() string
+	Network() string
 
 	Close() error
 

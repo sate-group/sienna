@@ -35,7 +35,7 @@ func (c *TcpClient) Conn() net.Conn {
 func (c *TcpClient) Address() string {
 	return c.address
 }
-func (c *TcpClient) Kind() string {
+func (c *TcpClient) Network() string {
 	return "tcp"
 }
 
