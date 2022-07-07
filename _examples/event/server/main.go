@@ -35,7 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 	switch event {
-	case "get_user":
+	case "client:user_sendInfo":
 		userDto := &UserDto{}
 		if err := state.Decode(userDto); err != nil {
 			log.Fatal(err)

@@ -30,6 +30,12 @@ func main() {
 		Street:    "2551 Eastland Avenue",
 		Telephone: "601-420-5622",
 	}
-	client.SendEvent("get_user", user)
+	/*
+		Format/Syntax
+			productName:objectName_actionName
+
+		link: https://davidwells.io/blog/clean-analytics
+	*/
+	client.SendEvent("client:user_sendInfo", user)
 	log.Print("success send event")
 }
