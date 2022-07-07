@@ -18,10 +18,10 @@ func main() {
 	address := ":9192"
 	client, err := sienna.NewClient("tcp", address)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer client.Close()
-	log.Print("Client has successfully connected to the server")
+	log.Print("client has successfully connected to the server")
 
 	user := &UserDto{
 		Gender:    "male",
@@ -30,5 +30,6 @@ func main() {
 		Street:    "2551 Eastland Avenue",
 		Telephone: "601-420-5622",
 	}
-	client.SendJson(user)
+	client.SendEvent("get_user", user)
+	log.Print("success send event")
 }

@@ -8,11 +8,11 @@ import (
 )
 
 type UserDto struct {
-	Gender    string `json:"gender"`
-	Race      string `json:"race"`
-	Birthday  string `json:"birthday"`
-	Street    string `json:"street"`
-	Telephone string `json:"telephone"`
+	Gender    string
+	Race      string
+	Birthday  string
+	Street    string
+	Telephone string
 }
 
 func main() {

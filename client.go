@@ -17,6 +17,8 @@ type Client interface {
 	Read() (string, error)
 	SendJson(v any) error
 	ReadJson(v any) error
+	SendEvent(name string, v any) error
+	ReadEvent() (string, *State, error)
 }
 
 func NewClient(network, address string) (Client, error) {

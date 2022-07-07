@@ -89,3 +89,35 @@ func (c *TcpClient) ReadJson(v any) error {
 	}
 	return nil
 }
+
+type EventDto struct {
+	Name    string
+	Payload string
+}
+
+func (c *TcpClient) SendEvent(name string, v any) error {
+	out, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	payload := string(out)
+	dto := &EventDto{
+		Name:    name,
+		Payload: payload,
+	}
+	if err := c.SendJson(dto); err != nil {
+		return err
+	}
+	return nil
+}
+func (c *TcpClient) ReadEvent() (string, *State, error) {
+	dto := &EventDto{}
+	err := c.ReadJson(dto)
+	if err != nil {
+		return "", nil, err
+	}
+	name := dto.Name
+	p := dto.Payload
+	s := NewState(p)
+	return name, s, nil
+}
