@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"log"
 
 	"github.com/sate-infra/sienna"
@@ -19,29 +18,26 @@ func main() {
 	address := ":9192"
 	server, err := sienna.NewServer("tcp", address)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	log.Printf("server listening on %s", address)
-	client, err := server.Accept()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-
-	event, state, err := client.ReadEvent()
-	if err == io.EOF {
-		log.Fatal("no more input is available.")
-	} else if err != nil {
-		log.Fatal(err)
-	}
-	switch event {
-	case "client:user_sendInfo":
-		userDto := &UserDto{}
-		if err := state.Decode(userDto); err != nil {
-			log.Fatal(err)
+	log.Printf("Server listening on %s", address)
+	for {
+		client, err := server.Accept()
+		if err != nil {
+			log.Print(err)
+			continue
 		}
-		log.Printf("client sent the dto %+v", userDto)
-	default:
-		log.Fatalf("unknown event name %s", event)
+		go handleClient(client)
 	}
+}
+
+func handleClient(c sienna.Client) {
+	defer c.Close()
+	userDto := &UserDto{}
+	err := c.ReadJson(userDto)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	log.Printf("client sent the dto %+v", userDto)
 }

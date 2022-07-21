@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 
 	"github.com/sate-infra/sienna"
@@ -23,19 +24,6 @@ func main() {
 	defer client.Close()
 	log.Print("client has successfully connected to the server")
 
-	user := &UserDto{
-		Gender:    "male",
-		Race:      "White",
-		Birthday:  "2/26/1985 (37 years old)",
-		Street:    "2551 Eastland Avenue",
-		Telephone: "601-420-5622",
-	}
-	/*
-		Format/Syntax
-			productName:objectName_actionName
-
-		link: https://davidwells.io/blog/clean-analytics
-	*/
-	client.SendEvent("client:user_sendInfo", user)
+	client.SendErr(errors.New("can't load user info."))
 	log.Print("success send event")
 }

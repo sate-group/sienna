@@ -104,7 +104,6 @@ func (c *TcpClient) ReadJson(v any) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(str)
 	dto := &dtos.ReadJsonDto{}
 	if err := json.Unmarshal([]byte(str), &dto); err != nil {
 		return err
