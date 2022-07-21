@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"log"
 
 	"github.com/sate-infra/sienna"
@@ -32,16 +31,13 @@ func main() {
 	}
 }
 
-func handleClient(client sienna.Client) {
-	defer client.Close()
+func handleClient(c sienna.Client) {
+	defer c.Close()
 	userDto := &UserDto{}
-	err := client.ReadJson(userDto)
-	if err == io.EOF {
-		log.Print("No more input is available.")
-		return
-	} else if err != nil {
-		log.Print(err.Error())
+	err := c.ReadJson(userDto)
+	if err != nil {
+		log.Print(err)
 		return
 	}
-	log.Printf("Client sent the dto %+v", userDto)
+	log.Printf("client sent the dto %+v", userDto)
 }
