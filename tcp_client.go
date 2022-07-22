@@ -3,12 +3,12 @@ package sienna
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"strings"
 
 	"github.com/sate-infra/sienna/dtos"
+	"github.com/sate-infra/sienna/errs"
 )
 
 const (
@@ -83,19 +83,11 @@ func (c *TcpClient) SendJson(v any) error {
 	if err != nil {
 		return err
 	}
-	dto := &dtos.SendJsonDto{
-		Err:  "",
-		Data: data,
-	}
-	str, err := jsonToStr(dto)
-	if err != nil {
-		return err
-	}
 
-	if ok, err := c.Send(str); err != nil {
+	if ok, err := c.Send(data); err != nil {
 		return err
 	} else if !ok {
-		return SendDataFailedError(str)
+		return errs.NewDataTransferFailedErr()
 	}
 	return nil
 }
@@ -111,15 +103,7 @@ func jsonToStr(v any) (string, error) {
 
 func (c *TcpClient) ReadJson(v any) error {
 	str := c.Read()
-	dto := &dtos.ReadJsonDto{}
-	if err := json.Unmarshal([]byte(str), &dto); err != nil {
-		return err
-	}
-	if dto.Err != "" {
-		return errors.New(dto.Err)
-	}
-	data := dto.Data
-	if err := json.Unmarshal([]byte(data), &v); err != nil {
+	if err := json.Unmarshal([]byte(str), &v); err != nil {
 		return err
 	}
 	return nil
@@ -139,6 +123,7 @@ func (c *TcpClient) SendEvent(name string, v any) error {
 	}
 	return nil
 }
+
 func (c *TcpClient) ReadEvent() (string, *State, error) {
 	dto := &dtos.EventDto{}
 	if err := c.ReadJson(dto); err != nil {
@@ -148,22 +133,4 @@ func (c *TcpClient) ReadEvent() (string, *State, error) {
 	p := dto.Payload
 	s := NewState(p)
 	return name, s, nil
-}
-
-func (c *TcpClient) SendErr(err error) error {
-	errStr := err.Error()
-	dto := &dtos.SendJsonDto{
-		Err:  errStr,
-		Data: "",
-	}
-	str, err := jsonToStr(dto)
-	if err != nil {
-		return err
-	}
-	if ok, err := c.Send(str); err != nil {
-		return err
-	} else if !ok {
-		return SendDataFailedError(str)
-	}
-	return nil
 }
