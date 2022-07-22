@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"log"
 
 	"github.com/sate-infra/sienna"
@@ -22,22 +23,37 @@ func main() {
 	}
 	log.Printf("Server listening on %s", address)
 	for {
-		client, err := server.Accept()
+		c, err := server.Accept()
 		if err != nil {
 			log.Print(err)
 			continue
 		}
-		go handleClient(client)
+		go func() {
+			defer c.Close()
+			for {
+				if err := c.Run(); err == io.EOF {
+					log.Println("client has disconnected.")
+				} else if err != nil {
+					log.Println(err)
+					return
+				}
+			}
+		}()
+		go func() {
+			for {
+				if err := handleClient(c); err != nil {
+					log.Println("handleClient", err)
+				}
+			}
+		}()
 	}
 }
 
-func handleClient(c sienna.Client) {
-	defer c.Close()
+func handleClient(c sienna.Client) error {
 	userDto := &UserDto{}
-	err := c.ReadJson(userDto)
-	if err != nil {
-		log.Print(err)
-		return
+	if err := c.ReadJson(userDto); err != nil {
+		return err
 	}
 	log.Printf("client sent the dto %+v", userDto)
+	return nil
 }

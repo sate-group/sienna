@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/sate-infra/sienna"
 )
@@ -30,8 +32,11 @@ func main() {
 		Street:    "2551 Eastland Avenue",
 		Telephone: "601-420-5622",
 	}
-	if err := client.SendJson(user); err != nil {
-		log.Print(err)
+	for {
+		if err := client.SendJson(user); err != nil {
+			log.Print(err)
+		}
+		fmt.Println("send json")
+		time.Sleep(1 * time.Second)
 	}
-
 }

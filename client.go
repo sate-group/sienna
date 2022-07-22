@@ -11,10 +11,11 @@ type Client interface {
 	Address() string
 	Network() string
 
+	Run() error
 	Close() error
 
 	Send(a ...any) (bool, error)
-	Read() (string, error)
+	Read() string
 	SendJson(v any) error
 	ReadJson(v any) error
 	SendEvent(name string, v any) error

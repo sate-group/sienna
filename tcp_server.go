@@ -36,7 +36,9 @@ func (s *TcpServer) Accept() (Client, error) {
 		return nil, err
 	}
 	var client Client = &TcpClient{
-		conn: conn,
+		conn:    conn,
+		address: conn.RemoteAddr().String(),
+		input:   make(chan string),
 	}
 	return client, nil
 }

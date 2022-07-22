@@ -3,21 +3,24 @@ package sienna
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"strings"
 
 	"github.com/sate-infra/sienna/dtos"
-	"github.com/sate-infra/sienna/errs"
 )
 
 const (
 	TCP_CLIENT_NETWORK = "tcp"
 )
 
+var ()
+
 type TcpClient struct {
 	conn    net.Conn
 	address string
+	input   chan string
 }
 
 func newTcpClient(address string) (*TcpClient, error) {
@@ -28,6 +31,7 @@ func newTcpClient(address string) (*TcpClient, error) {
 	client := &TcpClient{
 		conn:    conn,
 		address: address,
+		input:   make(chan string),
 	}
 	return client, nil
 }
@@ -40,6 +44,17 @@ func (c *TcpClient) Close() error {
 	conn := c.Conn()
 	err := conn.Close()
 	return err
+}
+
+func (c *TcpClient) Run() error {
+	conn := c.Conn()
+	str, err := bufio.NewReader(conn).ReadString(DIVIDER)
+	if err != nil {
+		return err
+	}
+	result := strings.ReplaceAll(str, string(DIVIDER), "")
+	c.input <- result
+	return nil
 }
 
 func (c *TcpClient) Send(a ...any) (bool, error) {
@@ -58,14 +73,9 @@ func (c *TcpClient) Send(a ...any) (bool, error) {
 	return success, nil // n - 1 is removed "DIVIDER"
 }
 
-func (c *TcpClient) Read() (string, error) {
-	conn := c.Conn()
-	str, err := bufio.NewReader(conn).ReadString(DIVIDER)
-	if err != nil {
-		return "", err
-	}
-	result := strings.ReplaceAll(str, string(DIVIDER), "")
-	return result, nil
+func (c *TcpClient) Read() string {
+	str := <-c.input
+	return str
 }
 
 func (c *TcpClient) SendJson(v any) error {
@@ -100,16 +110,13 @@ func jsonToStr(v any) (string, error) {
 }
 
 func (c *TcpClient) ReadJson(v any) error {
-	str, err := c.Read()
-	if err != nil {
-		return err
-	}
+	str := c.Read()
 	dto := &dtos.ReadJsonDto{}
 	if err := json.Unmarshal([]byte(str), &dto); err != nil {
 		return err
 	}
 	if dto.Err != "" {
-		return errs.NewClientErr(dto.Err)
+		return errors.New(dto.Err)
 	}
 	data := dto.Data
 	if err := json.Unmarshal([]byte(data), &v); err != nil {
