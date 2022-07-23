@@ -15,7 +15,7 @@ type Client interface {
 	Close() error
 
 	Send(a ...any) (bool, error)
-	Read() string
+	Read() (string, error)
 	SendJson(v any) error
 	ReadJson(v any) error
 	SendEvent(name string, v any) error

@@ -43,6 +43,7 @@ func (c *TcpClient) Network() string { return "tcp" }
 func (c *TcpClient) Close() error {
 	conn := c.Conn()
 	err := conn.Close()
+	close(c.input)
 	return err
 }
 
@@ -73,9 +74,12 @@ func (c *TcpClient) Send(a ...any) (bool, error) {
 	return success, nil // n - 1 is removed "DIVIDER"
 }
 
-func (c *TcpClient) Read() string {
-	str := <-c.input
-	return str
+func (c *TcpClient) Read() (string, error) {
+	str, ok := <-c.input
+	if !ok {
+		return "", errs.NewClientClosedErr()
+	}
+	return str, nil
 }
 
 func (c *TcpClient) SendJson(v any) error {
@@ -102,7 +106,10 @@ func jsonToStr(v any) (string, error) {
 }
 
 func (c *TcpClient) ReadJson(v any) error {
-	str := c.Read()
+	str, err := c.Read()
+	if err != nil {
+		return err
+	}
 	if err := json.Unmarshal([]byte(str), &v); err != nil {
 		return err
 	}
