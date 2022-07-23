@@ -2,7 +2,6 @@ package sienna
 
 import (
 	"bufio"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -27,7 +26,7 @@ type TcpClient struct {
 }
 
 func newTcpClient(address string) (*TcpClient, error) {
-	conn, err := net.Dial("tcp", address)
+	conn, err := net.Dial(TCP_CLIENT_NETWORK, address)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +40,7 @@ func newTcpClient(address string) (*TcpClient, error) {
 
 func (c *TcpClient) Conn() net.Conn  { return c.conn }
 func (c *TcpClient) Address() string { return c.address }
-func (c *TcpClient) Network() string { return "tcp" }
+func (c *TcpClient) Network() string { return TCP_CLIENT_NETWORK }
 
 func (c *TcpClient) Close() error {
 	conn := c.Conn()
@@ -102,21 +101,12 @@ func (c *TcpClient) SendJson(v any) error {
 	return nil
 }
 
-func jsonToStr(v any) (string, error) {
-	out, err := json.Marshal(v)
-	if err != nil {
-		return "", err
-	}
-	str := string(out)
-	return str, nil
-}
-
 func (c *TcpClient) ReadJson(v any) error {
 	str, err := c.Read()
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal([]byte(str), &v); err != nil {
+	if err := strToJson(v, str); err != nil {
 		return err
 	}
 	return nil
