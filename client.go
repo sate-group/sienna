@@ -1,6 +1,10 @@
 package sienna
 
-import "net"
+import (
+	"net"
+
+	"github.com/sate-infra/sienna/errs"
+)
 
 const (
 	DIVIDER = '\n'
@@ -31,6 +35,6 @@ func NewClient(network, address string) (Client, error) {
 		}
 		return client, nil
 	default:
-		return nil, UnknownNetworkError(network)
+		return nil, errs.NewUnknownNetworkErr(network)
 	}
 }

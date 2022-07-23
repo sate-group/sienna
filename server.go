@@ -1,6 +1,10 @@
 package sienna
 
-import "net"
+import (
+	"net"
+
+	"github.com/sate-infra/sienna/errs"
+)
 
 type Server interface {
 	Listener() net.Listener
@@ -20,6 +24,6 @@ func NewServer(network, address string) (Server, error) {
 		}
 		return server, nil
 	default:
-		return nil, UnknownNetworkError(network)
+		return nil, errs.NewUnknownNetworkErr(network)
 	}
 }
