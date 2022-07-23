@@ -27,7 +27,7 @@ func main() {
 		if err != nil {
 			log.Print(err)
 			continue
-		}
+		}7
 		go func() {
 			defer c.Close()
 			for {
