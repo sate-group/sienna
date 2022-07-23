@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/sate-infra/sienna"
+	"github.com/sate-infra/sienna/errs"
 )
 
 type UserDto struct {
@@ -32,7 +33,12 @@ func main() {
 		Telephone: "601-420-5622",
 	}
 	for {
-		if err := client.SendJson(user); err != nil {
+		if err := client.SendJson(user); errs.IsClientDisconnectedErr(err) {
+			log.Print(err)
+			return
+		} else if errs.IsDataTransferFailedErr(err) {
+			log.Print(err)
+		} else if err != nil {
 			log.Print(err)
 		}
 		log.Print("send user json to server")

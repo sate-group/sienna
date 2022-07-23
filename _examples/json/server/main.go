@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"log"
 
 	"github.com/sate-infra/sienna"
@@ -32,8 +31,8 @@ func main() {
 		go func() {
 			defer c.Close()
 			for {
-				if err := c.Run(); err == io.EOF {
-					log.Print("client has disconnected.")
+				if err := c.Run(); errs.IsClientDisconnectedErr(err) {
+					log.Print(err)
 					return
 				} else if err != nil {
 					log.Print(err)
@@ -46,6 +45,11 @@ func main() {
 				if err := handleClient(c); errs.IsClientClosedErr(err) {
 					log.Print(err)
 					return
+				} else if errs.IsClientDisconnectedErr(err) {
+					log.Print(err)
+					return
+				} else if errs.IsDataTransferFailedErr(err) {
+					log.Print(err)
 				} else if err != nil {
 					log.Print(err)
 				}
