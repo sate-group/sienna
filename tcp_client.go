@@ -3,9 +3,12 @@ package sienna
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"strings"
+	"syscall"
 
 	"github.com/sate-infra/sienna/dtos"
 	"github.com/sate-infra/sienna/errs"
@@ -42,15 +45,19 @@ func (c *TcpClient) Network() string { return "tcp" }
 
 func (c *TcpClient) Close() error {
 	conn := c.Conn()
-	err := conn.Close()
 	close(c.input)
-	return err
+	if err := conn.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *TcpClient) Run() error {
 	conn := c.Conn()
 	str, err := bufio.NewReader(conn).ReadString(DIVIDER)
-	if err != nil {
+	if err == io.EOF {
+		return errs.NewClientDisconnectedErr()
+	} else if err != nil {
 		return err
 	}
 	result := strings.ReplaceAll(str, string(DIVIDER), "")
@@ -58,20 +65,21 @@ func (c *TcpClient) Run() error {
 	return nil
 }
 
-func (c *TcpClient) Send(a ...any) (bool, error) {
+func (c *TcpClient) Send(a ...any) error {
 	s := fmt.Sprint(a...)
 	b := []byte(s)
 	b = append(b, DIVIDER)
 
 	n, err := c.Conn().Write(b)
-	if err != nil {
-		return false, err
+	if errors.Is(err, syscall.EPIPE) {
+		return errs.NewClientDisconnectedErr()
+	} else if err != nil {
+		return err
 	}
-	success := false
-	if n == len(b) {
-		success = true
+	if n != len(b) {
+		return errs.NewDataTransferFailedErr()
 	}
-	return success, nil // n - 1 is removed "DIVIDER"
+	return nil
 }
 
 func (c *TcpClient) Read() (string, error) {
@@ -88,10 +96,8 @@ func (c *TcpClient) SendJson(v any) error {
 		return err
 	}
 
-	if ok, err := c.Send(data); err != nil {
+	if err := c.Send(data); err != nil {
 		return err
-	} else if !ok {
-		return errs.NewDataTransferFailedErr()
 	}
 	return nil
 }

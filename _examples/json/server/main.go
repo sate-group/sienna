@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/sate-infra/sienna"
+	"github.com/sate-infra/sienna/errs"
 )
 
 type UserDto struct {
@@ -32,17 +33,21 @@ func main() {
 			defer c.Close()
 			for {
 				if err := c.Run(); err == io.EOF {
-					log.Println("client has disconnected.")
+					log.Print("client has disconnected.")
+					return
 				} else if err != nil {
-					log.Println(err)
+					log.Print(err)
 					return
 				}
 			}
 		}()
 		go func() {
 			for {
-				if err := handleClient(c); err != nil {
-					log.Println("handleClient", err)
+				if err := handleClient(c); errs.IsClientClosedErr(err) {
+					log.Print(err)
+					return
+				} else if err != nil {
+					log.Print(err)
 				}
 			}
 		}()

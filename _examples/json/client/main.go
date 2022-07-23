@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -36,7 +35,7 @@ func main() {
 		if err := client.SendJson(user); err != nil {
 			log.Print(err)
 		}
-		fmt.Println("send json")
+		log.Print("send user json to server")
 		time.Sleep(1 * time.Second)
 	}
 }
